@@ -1,0 +1,22 @@
+{
+  "ChatClient": {
+    "SystemPrompt": "You are acting as an assistant operating a ski rental place. Your role is to provide information about ski rentals, including types of skis, and availability. You also help renting and returning skis, as well as managing the databaase of the ski equipment."
+  },
+  "McpServer": [
+    {
+      "Name": "Ski Rental",
+      "Endpoint": "https://ski-mcp-ctd3dnc7gkf5dtct.canadacentral-01.azurewebsites.net",
+      "Enabled": true
+    },
+    {
+      "Name": "Zapier gmail",
+      "Endpoint": "https://mcp.zapier.com/api/mcp/s/ZDFmODczZGItMTgwZS00ZTFiLTlhMzctODBkMTEzYmMwNjJjOjM0YzVkZGNkLTQ3M2MtNDgyMi1iOWY0LTJhNWQ4NzE3Yzc2Yg==/mcp",
+      "Enabled": true
+    },
+    {
+      "Name": "Local Test MCP",
+      "Endpoint": "http://localhost:3007",
+      "Enabled": false
+    }
+  ]
+}
