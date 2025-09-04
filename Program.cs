@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var mcpChatConfig = builder.Configuration["ChatClient:ConfigFile"];
 if (!string.IsNullOrEmpty(mcpChatConfig))
     builder.Configuration.AddJsonFile(mcpChatConfig, optional: true, reloadOnChange: true);
-Console.WriteLine("🔧 ======= Configuration settings: =======");
+Console.WriteLine("🔧 ======= Version 1.0.1 Configuration settings: =======");
 foreach (var c in builder.Configuration.AsEnumerable()) Console.WriteLine(c.Key + " = " + c.Value);
 
 builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 26214400); // 25MB
