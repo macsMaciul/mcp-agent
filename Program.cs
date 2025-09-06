@@ -53,6 +53,20 @@ app.MapGet("/health", () =>
     });
 });
 
+// reinitialize chat client
+app.MapPost("/newsession", async (MCPChat mcpChat) =>
+{
+    mcpChat.InitializeSession();
+    return Results.Json(new { success = true, message = "Chat client reinitialized" });
+});
+
+// reinitialize mcp clients
+app.MapPost("/reinit", async (MCPChat mcpChat) =>
+{
+    await mcpChat.ReconnectMCPClients();
+    return Results.Json(new { success = true, message = "MCP clients reinitialized" });
+});
+
 // process text input
 app.MapPost("/process", async (HttpRequest request, MCPChat mcpChat) =>
 {

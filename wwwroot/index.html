@@ -1,235 +1,765 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>HeyGen Streaming API with Voice Activity Detection</title>
+    <title>AI Voice Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+      :root {
+        --md-sys-color-primary: #2563eb;
+        --md-sys-color-on-primary: #ffffff;
+        --md-sys-color-primary-container: #dbeafe;
+        --md-sys-color-on-primary-container: #1e40af;
+        --md-sys-color-secondary: #475569;
+        --md-sys-color-on-secondary: #ffffff;
+        --md-sys-color-secondary-container: #e2e8f0;
+        --md-sys-color-on-secondary-container: #334155;
+        --md-sys-color-tertiary: #059669;
+        --md-sys-color-surface: #ffffff;
+        --md-sys-color-surface-variant: #f1f5f9;
+        --md-sys-color-on-surface-variant: #475569;
+        --md-sys-color-outline: #64748b;
+        --md-sys-color-outline-variant: #cbd5e1;
+        --md-sys-color-error: #dc2626;
+        --md-sys-color-success: #059669;
+        --md-sys-color-bubble-user: #2563eb;
+        --md-sys-color-bubble-user-text: #ffffff;
+        --md-sys-color-bubble-content: #ffffff;
+        --md-sys-color-bubble-content-text: #1e293b;
+        --md-elevation-1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        --md-elevation-2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+        --md-elevation-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
       }
-      
+
+      [data-theme="dark"] {
+        --md-sys-color-primary: #60a5fa;
+        --md-sys-color-on-primary: #000000;
+        --md-sys-color-primary-container: #1e3a8a;
+        --md-sys-color-on-primary-container: #dbeafe;
+        --md-sys-color-secondary: #94a3b8;
+        --md-sys-color-on-secondary: #ffffff;
+        --md-sys-color-secondary-container: #1e293b;
+        --md-sys-color-on-secondary-container: #e2e8f0;
+        --md-sys-color-tertiary: #34d399;
+        --md-sys-color-surface: #111827;
+        --md-sys-color-surface-variant: #1f2937;
+        --md-sys-color-on-surface-variant: #d1d5db;
+        --md-sys-color-outline: #6b7280;
+        --md-sys-color-outline-variant: #374151;
+        --md-sys-color-error: #ef4444;
+        --md-sys-color-success: #22c55e;
+        --md-sys-color-bubble-user: #2563eb;
+        --md-sys-color-bubble-user-text: #ffffff;
+        --md-sys-color-bubble-content: #374151;
+        --md-sys-color-bubble-content-text: #f3f4f6;
+      }
+
+      [data-theme="dark"] body {
+        background: #0f172a;
+      }
+
+      [data-theme="dark"] .material-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      [data-theme="dark"] .left-panel {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      [data-theme="dark"] .control-buttons {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      [data-theme="dark"] .input-section {
+        background: rgba(17, 24, 39, 0.5);
+        border-top: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      [data-theme="dark"] .material-input {
+        background: rgba(17, 24, 39, 0.9);
+        border-color: var(--md-sys-color-outline-variant);
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      [data-theme="dark"] .video-window {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      [data-theme="dark"] .status-indicator {
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      [data-theme="dark"] .settings-modal {
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      [data-theme="dark"] .settings-content {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      [data-theme="dark"] .settings-row {
+        border-bottom-color: var(--md-sys-color-outline-variant);
+      }
+
+      [data-theme="dark"] .settings-row label {
+        color: var(--md-sys-color-on-surface-variant) !important;
+      }
+
+      [data-theme="dark"] label {
+        color: var(--md-sys-color-on-surface-variant) !important;
+      }
+
+      [data-theme="dark"] .control-buttons label {
+        color: var(--md-sys-color-on-surface-variant) !important;
+      }
+
+      [data-theme="dark"] [style*="color: var(--md-sys-color-on-surface-variant)"] {
+        color: #d1d5db !important;
+      }
+
+      [data-theme="dark"] #volumeControls label,
+      [data-theme="dark"] #volumeControls div {
+        color: #d1d5db !important;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8fafc;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+
+      .material-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 28px;
+        box-shadow: var(--md-elevation-2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .material-card:hover {
+        box-shadow: var(--md-elevation-3);
+        transform: translateY(-2px);
+      }
+
+      .material-button {
+        background: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+        border: none;
+        border-radius: 20px;
+        padding: 12px 24px;
+        font-family: inherit;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--md-elevation-1);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .material-button:hover {
+        box-shadow: var(--md-elevation-2);
+        transform: scale(1.02);
+      }
+
+      .material-button:active {
+        transform: scale(0.98);
+      }
+
+      .material-button.secondary {
+        background: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-secondary-container);
+      }
+
+      .material-button.error {
+        background: var(--md-sys-color-error);
+        color: #ffffff;
+      }
+
+      .material-button.success {
+        background: var(--md-sys-color-success);
+        color: #ffffff;
+      }
+
+      .material-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid var(--md-sys-color-outline-variant);
+        border-radius: 12px;
+        padding: 16px;
+        font-family: inherit;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+
+      .material-input:focus {
+        outline: none;
+        border-color: var(--md-sys-color-primary);
+        box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 32px;
+        background: var(--md-sys-color-outline-variant);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        border: none;
+        outline: none;
+        display: inline-block;
+      }
+
+      .toggle-switch.active {
+        background: var(--md-sys-color-primary);
+      }
+
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        top: 4px;
+        left: 4px;
+        transition: left 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+
+      .toggle-switch.active::after {
+        left: 32px;
+      }
+
+      /* Main Layout */
+      .main-container {
+        display: flex;
+        height: 100vh;
+        padding: 20px;
+        gap: 20px;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+      }
+
+      .main-container.video-mode {
+        display: grid;
+        grid-template-columns: 1fr 250px 250px;
+        grid-template-rows: auto 1fr;
+        gap: 20px;
+      }
+
+      .left-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 28px;
+        box-shadow: var(--md-elevation-2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .main-container.video-mode .left-panel {
+        grid-column: 1;
+        grid-row: 1 / 3;
+      }
+
+      .right-panel {
+        width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .main-container.video-mode .right-panel {
+        grid-column: 2 / 4;
+        grid-row: 1;
+        width: auto;
+        display: contents;
+      }
+
+      .chat-window {
+        flex: 1;
+        background: var(--md-sys-color-surface-variant);
+        border-radius: 16px;
+        padding: 20px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        min-height: 0;
+      }
+
+      .input-section {
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .control-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: var(--md-elevation-1);
+      }
+
+      .control-buttons button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .video-window {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: var(--md-elevation-1);
+        display: none;
+      }
+
+      .main-container.video-mode .video-window {
+        display: flex;
+        grid-column: 2 / 4;
+        grid-row: 2;
+        flex-direction: column;
+        width: auto;
+        min-height: 0;
+        flex: 1;
+      }
+
+      .main-container.video-mode .control-buttons {
+        height: fit-content;
+        width: 250px;
+      }
+
+      .main-container.video-mode #volumeControls {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .main-container.video-mode #talkingControls {
+        grid-column: 3;
+        grid-row: 1;
+      }
+
+      .session-mode-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        margin: 12px 0;
+      }
+
+      .settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .settings-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 30px;
+        min-width: 400px;
+        max-width: 600px;
+        box-shadow: var(--md-elevation-3);
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 16px 0;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      }
+
+      .settings-row:last-child {
+        border-bottom: none;
+      }
+
+      /* Chat Styles */
+      .chat-bubble {
+        margin-bottom: 16px;
+        animation: slideInUp 0.3s ease;
+        max-width: 80%;
+      }
+
+      .chat-bubble.user {
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      .chat-bubble.assistant {
+        margin-right: auto;
+        margin-left: 0;
+      }
+
+      .chat-bubble-content {
+        background: var(--md-sys-color-bubble-content);
+        color: var(--md-sys-color-bubble-content-text);
+        padding: 16px 20px;
+        border-radius: 24px 24px 8px 24px;
+        box-shadow: var(--md-elevation-1);
+        word-wrap: break-word;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .chat-bubble.user .chat-bubble-content {
+        background: var(--md-sys-color-bubble-user);
+        color: var(--md-sys-color-bubble-user-text);
+        border-radius: 24px 24px 24px 8px;
+      }
+
+      .chat-timestamp {
+        font-size: 11px;
+        color: var(--md-sys-color-outline);
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
       .audio-level {
         width: 100%;
-        height: 30px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
+        height: 8px;
+        background: var(--md-sys-color-surface-variant);
+        border-radius: 4px;
         overflow: hidden;
         position: relative;
-        margin: 10px 0;
+        margin: 16px 0;
       }
       
       .audio-level-bar {
         height: 100%;
-        background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722);
+        background: linear-gradient(90deg, var(--md-sys-color-success), #ffa726, var(--md-sys-color-error));
         width: 0%;
         transition: width 0.1s ease;
-        border-radius: 15px;
+        border-radius: 4px;
       }
-      
-      .audio-level-text {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 12px;
-        font-weight: bold;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        color: white;
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
       }
-      
-      .transcript-item {
-        margin-bottom: 10px;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        border-left: 3px solid rgba(255, 255, 255, 0.3);
-        animation: fadeIn 0.3s ease-in;
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--md-sys-color-success);
       }
-      
-      .transcript-item.processing {
-        opacity: 0.7;
-        font-style: italic;
+
+      .status-dot.recording {
+        background: var(--md-sys-color-error);
+        animation: pulse 1.5s infinite;
       }
-      
-      .transcript-timestamp {
-        font-size: 10px;
-        color: rgba(255, 255, 255, 0.6);
-        margin-bottom: 5px;
+
+      .video-container {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #000;
+        aspect-ratio: 16/9;
+        margin: 20px 0;
+        width: 100%;
+        height: auto;
       }
-      
-      .transcript-text-request {
-        font-size: 12px;
-        line-height: 1.4;
-        color: yellow;
+
+      .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
-      
-      .transcript-text-response {
-        font-size: 12px;
-        line-height: 1.4;
-        color: white;
+
+      .main-container.video-mode .video-container {
+        margin: 0;
+        flex: 1;
+        height: 100%;
+        width: 100%;
+        min-height: 200px;
+        aspect-ratio: 16/9;
       }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+
+      @keyframes slideInUp {
+        from { 
+          opacity: 0; 
+          transform: translateY(20px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0); 
+        }
       }
       
       @keyframes pulse {
-        0% { opacity: 0.7; }
-        50% { opacity: 1; }
-        100% { opacity: 0.7; }
+        0%, 100% { 
+          opacity: 1; 
+          transform: scale(1);
+        }
+        50% { 
+          opacity: 0.8; 
+          transform: scale(1.02);
+        }
       }
-      
-      .recording {
-        animation: pulse 1.5s infinite;
+
+      kbd {
+        background: var(--md-sys-color-surface-variant);
+        color: var(--md-sys-color-on-surface-variant);
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: 500;
+        border: 1px solid var(--md-sys-color-outline-variant);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        font-size: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .main-container {
+          flex-direction: column;
+          height: auto;
+          min-height: 100vh;
+        }
+        
+        .main-container.video-mode {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .main-container.video-mode .left-panel {
+          grid-column: unset;
+          grid-row: unset;
+          order: 2;
+        }
+        
+        .right-panel {
+          width: 100%;
+          order: -1;
+        }
+        
+        .main-container.video-mode .right-panel {
+          grid-column: unset;
+          grid-row: unset;
+          display: flex;
+          flex-direction: column;
+          order: 1;
+        }
+        
+        .main-container.video-mode .video-window {
+          grid-column: unset;
+          grid-row: unset;
+          order: 3;
+        }
+        
+        .main-container.video-mode #volumeControls,
+        .main-container.video-mode #talkingControls {
+          grid-column: unset;
+        }
       }
     </style>
   </head>
 
-  <body class="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 min-h-screen text-white font-sans">
-    <div class="max-w-7xl mx-auto p-5">
-      <h1 class="text-3xl font-light text-center mb-8">HeyGen Streaming with Voice Activity Detection</h1>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Left Panel: HeyGen Streaming -->
-        <div class="glass-effect p-6 rounded-xl shadow-2xl">
-          <h2 class="text-xl font-medium mb-4">🎭 Avatar Streaming</h2>
-          
-          <div class="flex flex-wrap gap-2.5 mb-5">
-            <input
-              id="avatarID"
-              type="text"
-              placeholder="Avatar ID"
-              value="Wayne_20240711"
-              class="flex-1 min-w-[200px] p-2 bg-white/20 border border-white/30 rounded-md text-white placeholder-white/70"
-            />
-            <input
-              id="voiceID"
-              type="text"
-              placeholder="Voice ID"
-              class="flex-1 min-w-[200px] p-2 bg-white/20 border border-white/30 rounded-md text-white placeholder-white/70"
-            />
+  <body>
+    <div class="main-container" id="mainContainer">
+      <!-- Left Panel: Chat Window -->
+      <div class="left-panel">
+        <!-- Header -->
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-medium" style="color: var(--md-sys-color-on-surface-variant);">AI Voice Assistant</h1>
+          <p style="color: var(--md-sys-color-outline); font-size: 14px;">Intelligent conversation with voice and video</p>
+        </div>
+        
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow">
+          <div id="transcriptsList" style="color: var(--md-sys-color-outline); font-size: 14px;">
+<!---            Welcome! Start talking or type a message below...-->
           </div>
-
-          <div class="flex flex-wrap gap-2.5 mb-5">
-            <button
-              id="startBtn"
-              class="px-4 py-2 bg-green-500/80 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-filter backdrop-blur-sm"
-            >
-              Start Session
-            </button>
-            <button
-              id="closeBtn"
-              class="px-4 py-2 bg-red-500/80 text-white rounded-md hover:bg-red-600 transition-colors backdrop-filter backdrop-blur-sm"
-            >
-              Close Session
-            </button>
-          </div>
-
-          <div class="flex flex-wrap gap-2.5 mb-5">
+        </div>
+        
+        <!-- Input Section -->
+        <div class="input-section">
+          <div class="flex gap-3 mb-2">
             <input
               id="taskInput"
               type="text"
-              placeholder="Enter text for avatar to speak"
-              class="flex-1 min-w-[200px] p-2 bg-white/20 border border-white/30 rounded-md text-white placeholder-white/70"
+              placeholder="Type your message (supports **bold**, *italic*, `code`, [links](url), etc.) - Press Enter to send"
+              class="material-input flex-1"
+              title="Supports Markdown formatting: **bold**, *italic*, `code`, [links](url), # headers, lists, and HTML tags"
             />
-            <button
-              id="talkBtn"
-              class="px-4 py-2 bg-blue-500/80 text-white rounded-md hover:bg-blue-600 transition-colors backdrop-filter backdrop-blur-sm"
-            >
-              Talk (LLM)
-            </button>
-            <button
-              id="repeatBtn"
-              class="px-4 py-2 bg-purple-500/80 text-white rounded-md hover:bg-purple-600 transition-colors backdrop-filter backdrop-blur-sm"
-            >
-              Repeat
+            <button id="talkBtn" class="material-button">
+              <span class="material-symbols-outlined">psychology</span>
+              Ask AI
             </button>
           </div>
-
-          <video
-            id="mediaElement"
-            class="w-full max-h-[300px] border border-white/30 rounded-lg my-5 bg-black/20"
-            autoplay
-          ></video>
-          
-          <div
-            id="status"
-            class="p-2.5 bg-black/20 border border-white/30 rounded-md h-[100px] overflow-y-auto font-mono text-sm"
-          ></div>
+          <div class="text-xs" style="color: var(--md-sys-color-outline); padding: 0 4px;">
+            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">info</span>
+            Supports HTML & Markdown: <strong>**bold**</strong>, <em>*italic*</em>, <code>`code`</code>, headers, lists, links, tables • Press <kbd>Enter</kbd> to send
+          </div>
         </div>
-
-        <!-- Right Panel: Voice Activity Detection -->
-        <div class="glass-effect p-6 rounded-xl shadow-2xl">
-          <h2 class="text-xl font-medium mb-4">🎤 Voice Activity Detection</h2>
+      </div>
+      
+      <!-- Right Panel: Controls and Video -->
+      <div class="right-panel" id="rightPanel">
+        <!-- Control Buttons (First in text mode) -->
+        <div class="control-buttons" id="talkingControls">
+          <button id="startTalkingBtn" class="material-button success">
+            <span class="material-symbols-outlined">mic</span>
+            Start Talking
+          </button>
+          <button id="stopTalkingBtn" class="material-button error" disabled>
+            <span class="material-symbols-outlined">mic_off</span>
+            Stop Talking
+          </button>
           
-          <!-- VAD Settings -->
-          <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
-            <div>
-              <label class="block text-xs font-medium mb-1">Silence Duration (ms)</label>
-              <input type="number" id="silenceDuration" value="1500" min="500" max="5000" step="100"
-                class="w-full p-2 bg-white/20 border border-white/30 rounded text-white text-xs">
-            </div>
-            <div>
-              <label class="block text-xs font-medium mb-1">Volume Threshold</label>
-              <input type="range" id="volumeThreshold" min="0" max="100" value="15"
-                class="w-full">
-            </div>
-            <div>
-              <label class="block text-xs font-medium mb-1">Min Recording (ms)</label>
-              <input type="number" id="minRecordingDuration" value="1000" min="500" max="5000" step="100"
-                class="w-full p-2 bg-white/20 border border-white/30 rounded text-white text-xs">
-            </div>
-            <div>
-              <label class="block text-xs font-medium mb-1">Pre-buffer (ms)</label>
-              <input type="number" id="preBufferDuration" value="2000" min="500" max="5000" step="100"
-                class="w-full p-2 bg-white/20 border border-white/30 rounded text-white text-xs">
-            </div>
+          <!-- Mode Toggle -->
+          <div class="session-mode-toggle">
+            <span style="color: var(--md-sys-color-on-surface-variant); font-size: 12px;">Text/Speech</span>
+            <button id="sessionModeToggle" class="toggle-switch" aria-label="Toggle between text/speech and video mode"></button>
+            <span style="color: var(--md-sys-color-on-surface-variant); font-size: 12px;">Video</span>
           </div>
-
-          <!-- Audio Level Indicator -->
-          <div class="audio-level">
-            <div class="audio-level-bar" id="audioLevelBar"></div>
-            <div class="audio-level-text" id="audioLevelText">Audio Level: 0%</div>
+          
+          <button id="settingsBtn" class="material-button secondary">
+            <span class="material-symbols-outlined">settings</span>
+            Settings
+          </button>
+        </div>
+        
+        <!-- Voice Activity Status (Always Visible) -->
+        <div class="control-buttons" id="volumeControls">
+          <!-- Volume Threshold -->
+          <div style="margin-bottom: 16px;">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500; font-size: 12px; display: block; margin-bottom: 4px;">Volume Threshold</label>
+            <input type="range" id="volumeThreshold" min="0" max="100" value="15" style="width: 100%;">
+            <div style="font-size: 11px; color: var(--md-sys-color-outline); text-align: center; margin-top: 2px;" id="volumeThresholdValue">15</div>
           </div>
-
+          
+          <!-- Audio Level -->
+          <div style="margin-bottom: 16px;">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500; font-size: 12px; display: block; margin-bottom: 4px;">Audio Level</label>
+            <div class="audio-level">
+              <div class="audio-level-bar" id="audioLevelBar"></div>
+            </div>
+            <div style="font-size: 11px; color: var(--md-sys-color-outline); text-align: center; margin-top: 4px;" id="audioLevelText">Audio Level: 0%</div>
+          </div>
+          
           <!-- VAD Status -->
-          <div id="vadStatus" class="text-center p-2 bg-black/20 rounded-md mb-4 text-sm">
+          <div class="status-indicator" id="vadStatus" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+            <div class="status-dot"></div>
             Voice detection will start with session
           </div>
-
-          <!-- Stats -->
-          <div class="grid grid-cols-3 gap-2 mb-4 text-xs text-center">
-            <div>
-              <div class="text-lg font-bold" id="transcriptCount">0</div>
-              <div>Transcripts</div>
-            </div>
-            <div>
-              <div class="text-lg font-bold" id="totalWords">0</div>
-              <div>Words</div>
-            </div>
-            <div>
-              <div class="text-lg font-bold" id="avgProcessingTime">0ms</div>
-              <div>Avg Time</div>
-            </div>
+        </div>
+        
+        <!-- Video Window (hidden by default) -->
+        <div class="video-window" id="videoWindow">
+          <div class="video-container">
+            <video id="mediaElement" autoplay muted></video>
           </div>
-
-          <!-- Clear Button -->
-          <button id="clearBtn" class="w-full px-3 py-2 bg-gray-500/80 text-white rounded-md hover:bg-gray-600 transition-colors backdrop-filter backdrop-blur-sm text-sm mb-4">
-            🗑️ Clear Transcripts
-          </button>
-
-          <!-- Transcriptions -->
-          <div class="bg-black/20 border border-white/30 rounded-lg p-3 h-[200px] overflow-y-auto">
-            <h3 class="text-sm font-medium mb-2">📝 Transcriptions</h3>
-            <div id="transcriptsList" class="text-xs">
-              Voice segments will appear here...
-            </div>
+        </div>
+      </div>
+      
+      <!-- Settings Modal -->
+      <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-medium" style="color: var(--md-sys-color-on-surface-variant);">Audio Settings</h2>
+            <button id="closeSettingsBtn" class="material-button secondary" style="min-width: auto; padding: 8px;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          
+          <!-- Hidden elements for compatibility -->
+          <div style="display: none;">
+            <button id="startBtn"></button>
+            <button id="closeBtn"></button>
+            <button id="repeatBtn"></button>
+            <button id="clearBtn"></button>
+          </div>
+          
+          <!-- Dark Mode Toggle -->
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Dark Mode</label>
+            <button id="darkModeToggle" class="toggle-switch" aria-label="Toggle dark mode"></button>
+          </div>
+          
+          <!-- Avatar Configuration -->
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Avatar ID</label>
+            <input type="text" id="avatarID" value="Wayne_20240711" class="material-input" style="width: 180px;">
+          </div>
+          
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Voice ID</label>
+            <input type="text" id="voiceID" placeholder="Enter voice ID" class="material-input" style="width: 180px;">
+          </div>
+          
+          <!-- VAD Settings -->
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Silence Duration (ms)</label>
+            <input type="number" id="silenceDuration" value="1500" min="500" max="5000" step="100" class="material-input" style="width: 120px;">
+          </div>
+          
+          
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Min Recording (ms)</label>
+            <input type="number" id="minRecordingDuration" value="1000" min="500" max="5000" step="100" class="material-input" style="width: 120px;">
+          </div>
+          
+          <div class="settings-row">
+            <label style="color: var(--md-sys-color-on-surface-variant); font-weight: 500;">Pre-buffer (ms)</label>
+            <input type="number" id="preBufferDuration" value="2000" min="500" max="5000" step="100" class="material-input" style="width: 120px;">
+          </div>
+          
+          <!-- Hidden state elements for compatibility -->
+          <div style="display: none;">
+            <span id="transcriptCount">0</span>
+            <span id="totalWords">0</span>
+            <span id="avgProcessingTime">0ms</span>
           </div>
         </div>
       </div>
@@ -248,6 +778,7 @@
       let mediaStream = null;
       let webSocket = null;
       let sessionToken = null;
+      let isVideoMode = false;
 
       // Global variables for VAD
       let audioContext = null;
@@ -265,15 +796,16 @@
       let totalWords = 0;
       let processingTimes = [];
 
+      // Dark mode management
+      let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
       // DOM Elements
-      const statusElement = document.getElementById("status");
       const mediaElement = document.getElementById("mediaElement");
       const avatarID = document.getElementById("avatarID");
       const voiceID = document.getElementById("voiceID");
       const taskInput = document.getElementById("taskInput");
 
-      // VAD DOM Elements
-      const vadStatus = document.getElementById("vadStatus");
+      // VAD DOM Elements  
       const transcriptsList = document.getElementById("transcriptsList");
       const silenceDuration = document.getElementById("silenceDuration");
       const volumeThreshold = document.getElementById("volumeThreshold");
@@ -284,21 +816,33 @@
       const transcriptCountEl = document.getElementById("transcriptCount");
       const totalWordsEl = document.getElementById("totalWords");
       const avgProcessingTimeEl = document.getElementById("avgProcessingTime");
-
-      // Helper function to update status
-      function updateStatus(message) {
-        const timestamp = new Date().toLocaleTimeString();
-        statusElement.innerHTML += `[${timestamp}] ${message}<br>`;
-        statusElement.scrollTop = statusElement.scrollHeight;
-      }
+      
+      // UI mode management
+      let currentMode = 'text-speech';
+      let isListeningActive = false;
 
       // VAD Helper Functions
       function updateVADStatus(message) {
-        vadStatus.innerHTML = message;
+        const vadStatus = document.getElementById("vadStatus");
+        if (vadStatus) {
+          vadStatus.innerHTML = `<div class="status-dot"></div>${message}`;
+        }
       }
 
       async function processInput(text) {
         try {
+          if (!text || !text.trim()) return;
+          
+          transcriptCounter++;
+          const transcriptId = `transcript-${transcriptCounter}`;
+          
+          // First show the user's input
+          vadDetector.addTranscriptToUI(transcriptId, text, false);
+          
+          // Then add processing indicator for AI response
+          const processingId = `processing-${transcriptCounter}`;
+          vadDetector.addTranscriptToUI(processingId, '🔄 Processing...', true);
+
           const response = await fetch('/process', {
             method: 'POST',
             body: text
@@ -307,20 +851,23 @@
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          
-          transcriptCounter++;
-          const transcriptId = `transcript-${transcriptCounter}`;
-          vadDetector.addTranscriptToUI(transcriptId, '🔄 Processing...', true);
 
           const result = await response.json();
           const processingTime = 0;
             
           if (result.success && result.text && result.text.trim()) {
-            vadDetector.updateTranscriptInUI(transcriptId, result.requestText, result.text);
+            // Remove processing indicator and add actual response
+            vadDetector.removeTranscriptFromUI(processingId);
+            vadDetector.addAssistantResponse(result.text);
             vadDetector.updateStats(result.text, processingTime);
+          } else {
+            vadDetector.removeTranscriptFromUI(processingId);
           }
         } catch (error) {
             console.error('Error sending text:', error);
+            const processingId = `processing-${transcriptCounter}`;
+            vadDetector.removeTranscriptFromUI(processingId);
+            vadDetector.addAssistantResponse('❌ Error processing request');
         }
       }
 
@@ -354,7 +901,7 @@
             
             // Start the voice activity detection loop
             this.detectVoiceActivity();
-            
+
             console.log('Voice activity detection started');
             
           } catch (error) {
@@ -368,7 +915,7 @@
           
           // Analyze audio levels
           analyser.getByteFrequencyData(dataArray);
-          
+
           // Calculate average volume
           const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
           const volumePercent = Math.round((average / 255) * 100);
@@ -386,7 +933,7 @@
           if (volumePercent > threshold) {
             // Voice detected
             silenceStartTime = null;
-            
+
             if (!isRecording) {
               // Start a new recording session
               this.startRecording();
@@ -403,7 +950,7 @@
                   this.stopRecording();
                 } else {
                   console.log(`Recording too short (${recordingDuration}ms), continuing...`);
-                  silenceStartTime = null; // Reset silence timer
+                  silenceStartTime = null;
                 }
               }
             }
@@ -502,7 +1049,7 @@
               }
             } else {
               this.removeTranscriptFromUI(transcriptId);
-              transcriptCounter--; // Don't count failed transcriptions
+              transcriptCounter--;
               console.log('Empty or failed transcription');
             }
             
@@ -519,39 +1066,73 @@
         
         addTranscriptToUI(transcriptId, text, processing = false) {
           const transcriptDiv = document.createElement('div');
-          transcriptDiv.className = `transcript-item ${processing ? 'processing' : ''}`;
+          transcriptDiv.className = `chat-bubble user`;
           transcriptDiv.id = transcriptId;
           
           const timestamp = new Date().toLocaleTimeString();
           transcriptDiv.innerHTML = `
-            <div class="transcript-timestamp">${timestamp}</div>
-            <div class="transcript-text-request">${text}</div>
-            <div class="transcript-text-response"></div>
+            <div class="chat-bubble-content">
+              ${this.sanitizeHtml(text)}
+            </div>
+            <div class="chat-timestamp">${timestamp}</div>
           `;
           
           transcriptsList.appendChild(transcriptDiv);
-          requestAnimationFrame(() => {
-            transcriptsList.scrollTop = transcriptsList.scrollHeight;
-          });
+          transcriptDiv.scrollIntoView({ behavior: 'smooth' });
         }
         
         updateTranscriptInUI(transcriptId, requestText, responseText) {
           const transcriptEl = document.getElementById(transcriptId);
           if (transcriptEl) {
-            transcriptEl.classList.remove('processing');
-            const textEl1 = transcriptEl.querySelector('.transcript-text-request');
-            if (textEl1) {
-              textEl1.textContent = requestText;
+            const contentEl = transcriptEl.querySelector('.chat-bubble-content');
+            if (contentEl) {
+              contentEl.innerHTML = this.sanitizeHtml(requestText);
             }
-            const textEl2 = transcriptEl.querySelector('.transcript-text-response');
-            if (textEl2) {
-              textEl2.textContent = responseText;
+            
+            if (responseText && responseText.trim()) {
+              const responseDiv = document.createElement('div');
+              responseDiv.className = 'chat-bubble assistant';
+              responseDiv.innerHTML = `
+                <div class="chat-bubble-content">
+                  ${this.sanitizeHtml(responseText)}
+                </div>
+                <div class="chat-timestamp">${new Date().toLocaleTimeString()}</div>
+              `;
+              
+              transcriptEl.insertAdjacentElement('afterend', responseDiv);
+              responseDiv.scrollIntoView({ behavior: 'smooth' });
             }
-            textEl2.scrollIntoView({ behavior: 'smooth' });
           }
-          requestAnimationFrame(() => {
-            transcriptsList.scrollTop = transcriptsList.scrollHeight;
+          transcriptsList.scrollTop = transcriptsList.scrollHeight;
+        }
+        
+        sanitizeHtml(text) {
+          // Handle HTML code blocks - extract and preserve HTML content
+          let htmlBlocks = [];
+          let htmlIndex = 0;
+          
+          // Extract HTML blocks and replace with placeholders
+          text = text.replace(/```html\s*([\s\S]*?)\s*```/g, (match, htmlContent) => {
+            const placeholder = `__HTML_BLOCK_${htmlIndex}__`;
+            htmlBlocks[htmlIndex] = htmlContent.trim();
+            htmlIndex++;
+            return placeholder;
           });
+          
+          // Convert markdown formatting to HTML
+          text = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+            .replace(/\n/g, '<br>');
+          
+          // Restore HTML blocks
+          for (let i = 0; i < htmlBlocks.length; i++) {
+            text = text.replace(`__HTML_BLOCK_${i}__`, htmlBlocks[i]);
+          }
+          
+          return text;
         }
         
         removeTranscriptFromUI(transcriptId) {
@@ -559,6 +1140,20 @@
           if (transcriptEl) {
             transcriptEl.remove();
           }
+        }
+        
+        addAssistantResponse(text) {
+          const responseDiv = document.createElement('div');
+          responseDiv.className = 'chat-bubble assistant';
+          responseDiv.innerHTML = `
+            <div class="chat-bubble-content">
+              ${this.sanitizeHtml(text)}
+            </div>
+            <div class="chat-timestamp">${new Date().toLocaleTimeString()}</div>
+          `;
+          
+          transcriptsList.appendChild(responseDiv);
+          responseDiv.scrollIntoView({ behavior: 'smooth' });
         }
         
         updateStats(text, processingTime) {
@@ -589,7 +1184,7 @@
             vadStream = null;
           }
           
-          updateVADStatus('⏹️ Voice detection stopped');
+          updateVADStatus('Voice detection stopped');
           audioLevelBar.style.width = '0%';
           audioLevelText.textContent = 'Audio Level: 0%';
           
@@ -610,6 +1205,71 @@
 
       const vadDetector = new VoiceActivityDetector();
 
+      // UI Functions
+      function updateVideoVisibility() {
+        const mainContainer = document.getElementById("mainContainer");
+        const videoWindow = document.getElementById("videoWindow");
+        
+        if (isVideoMode) {
+          mainContainer.classList.add('video-mode');
+          videoWindow.style.display = 'flex';
+          currentMode = 'video';
+          updateStatusIndicator("Video mode enabled");
+        } else {
+          mainContainer.classList.remove('video-mode');
+          videoWindow.style.display = 'none';
+          currentMode = 'text-speech';
+          updateStatusIndicator("Text/Speech mode");
+        }
+      }
+      
+      function toggleSettings() {
+        const modal = document.getElementById("settingsModal");
+        const isVisible = modal.style.display === 'flex';
+        modal.style.display = isVisible ? 'none' : 'flex';
+      }
+      
+      function startListening() {
+        if (!isListeningActive) {
+          isListeningActive = true;
+          vadDetector.startListening();
+          document.getElementById("startTalkingBtn").disabled = true;
+          document.getElementById("stopTalkingBtn").disabled = false;
+        }
+      }
+      
+      function stopListening() {
+        if (isListeningActive) {
+          isListeningActive = false;
+          vadDetector.stopListening();
+          document.getElementById("startTalkingBtn").disabled = false;
+          document.getElementById("stopTalkingBtn").disabled = true;
+        }
+      }
+
+      function updateStatusIndicator(text, isActive = false) {
+        // Just log status updates since we removed the visual status indicator from video window
+        console.log(`Status: ${text}${isActive ? ' (active)' : ''}`);
+      }
+
+      // Dark mode functions
+      function toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+        localStorage.setItem('darkMode', isDarkMode);
+        updateDarkMode();
+      }
+
+      function updateDarkMode() {
+        const toggle = document.getElementById("darkModeToggle");
+        if (isDarkMode) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          toggle.classList.add('active');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.classList.remove('active');
+        }
+      }
+
       // HeyGen Functions
       async function getSessionToken() {
         const response = await fetch(
@@ -625,7 +1285,7 @@
 
         const data = await response.json();
         sessionToken = data.data.token;
-        updateStatus("Session token obtained");
+        updateStatusIndicator("Session token obtained");
       }
 
       async function connectWebSocket(sessionId) {
@@ -633,7 +1293,7 @@
           session_id: sessionId,
           session_token: sessionToken,
           silence_response: false,
-          opening_text: "Hello, how can I help you?",
+          opening_text: "",
           stt_language: "en",
         });
 
@@ -692,16 +1352,26 @@
         });
 
         mediaStream = new MediaStream();
-        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
-          if (track.kind === "video" || track.kind === "audio") {
-            mediaStream.addTrack(track.mediaStreamTrack);
-            if (
-              mediaStream.getVideoTracks().length > 0 &&
-              mediaStream.getAudioTracks().length > 0
-            ) {
-              mediaElement.srcObject = mediaStream;
-              updateStatus("Media stream ready");
-            }
+        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+          console.log(`Track subscribed: ${track.kind} from ${participant.identity}`);
+          
+          if (track.kind === LivekitClient.Track.Kind.Video) {
+            // Directly attach video track to the video element
+            const videoElement = track.attach();
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'cover';
+            
+            const videoContainer = document.querySelector('#mediaElement');
+            videoContainer.parentNode.replaceChild(videoElement, videoContainer);
+            videoElement.id = 'mediaElement';
+            
+            updateStatusIndicator("Video stream connected");
+          } else if (track.kind === LivekitClient.Track.Kind.Audio) {
+            // Attach audio track
+            const audioElement = track.attach();
+            document.body.appendChild(audioElement);
+            updateStatusIndicator("Audio stream connected");
           }
         });
 
@@ -713,19 +1383,18 @@
         });
 
         room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
-          updateStatus(`Room disconnected: ${reason}`);
+          updateStatusIndicator(`Room disconnected: ${reason}`);
         });
 
         await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
-        updateStatus("Connection prepared");
+        updateStatusIndicator("Connection prepared");
 
         await connectWebSocket(sessionInfo.session_id);
 
-        updateStatus("Session created successfully");
+        updateStatusIndicator("Session created successfully");
       }
 
       async function startStreamingSession() {
-        /*
         const startResponse = await fetch(
           `${API_CONFIG.serverUrl}/v1/streaming.start`,
           {
@@ -741,18 +1410,24 @@
         );
 
         await room.connect(sessionInfo.url, sessionInfo.access_token);
-        updateStatus("Connected to room");
-
-        document.querySelector("#startBtn").disabled = true;
-        updateStatus("Streaming started successfully");
-        */
-        // Start voice activity detection
-        await vadDetector.startListening();
+        updateStatusIndicator("Connected to room");
+/*
+        // Send initial task to activate the avatar and start video streaming
+        setTimeout(async () => {
+          try {
+            await sendText("Hello! I'm ready to chat with you.", "talk");
+            updateStatusIndicator("Avatar activated");
+          } catch (error) {
+            console.error('Error activating avatar:', error);
+          }
+        }, 1000);
+*/
+        updateStatusIndicator("Streaming started successfully");
       }
 
       async function sendText(text, taskType = "talk") {
         if (!sessionInfo) {
-          updateStatus("No active session");
+          updateStatusIndicator("No active session");
           return;
         }
 
@@ -772,18 +1447,14 @@
           }
         );
 
-        updateStatus(`Sent text (${taskType}): ${text}`);
+        updateStatusIndicator(`Sent text (${taskType}): ${text}`);
       }
 
       async function closeSession() {
-        // Stop voice activity detection first
-        vadDetector.stopListening();
-
         if (!sessionInfo) {
-          updateStatus("No active session");
+          updateStatusIndicator("No active session");
           return;
         }
-
 
         const response = await fetch(
           `${API_CONFIG.serverUrl}/v1/streaming.stop`,
@@ -811,38 +1482,126 @@
         room = null;
         mediaStream = null;
         sessionToken = null;
-        document.querySelector("#startBtn").disabled = false;
 
-        updateStatus("Session closed");
+        updateStatusIndicator("Session closed");
       }
 
       // Event Listeners
-      document.querySelector("#startBtn").addEventListener("click", async () => {
-        //await createNewSession();
-        await startStreamingSession();
-      });
+      document.querySelector("#sessionModeToggle").addEventListener("click", async () => {
+        const toggle = document.querySelector("#sessionModeToggle");
+        const wasVideoMode = isVideoMode;
+        isVideoMode = !isVideoMode;
+        toggle.classList.toggle('active', isVideoMode);
+        updateVideoVisibility();
+        
+        // If switching from video mode to text/speech mode, close any active Heygen session
+        if (wasVideoMode && !isVideoMode) {
+          if (sessionInfo) {
+            console.log('Closing Heygen session due to mode switch');
+            await closeSession();
+          } else if (isListeningActive) {
+            // If only voice detection was active, stop it
+            // stopListening();
+          }
+        }
+        
+        // If switching from text/speech to video mode, stop any active voice detection
+        if (!wasVideoMode && isVideoMode) {
+          if (isListeningActive) {
+            await createNewSession();
+            await startStreamingSession();
 
-      document.querySelector("#closeBtn").addEventListener("click", closeSession);
+            //console.log('Stopping voice detection due to mode switch');
+            //stopListening();
+          }
+        }
+        
+        console.log(`Switched to ${isVideoMode ? 'video' : 'text/speech'} mode`);
+      });
+      
+      // Volume threshold display update
+      document.querySelector("#volumeThreshold").addEventListener("input", (e) => {
+        document.getElementById("volumeThresholdValue").textContent = e.target.value;
+      });
+      
+      document.querySelector("#startTalkingBtn").addEventListener("click", async () => {
+        if (isVideoMode) {
+          // Video mode: Create Heygen session, start streaming, AND start voice detection
+          try {
+            updateStatusIndicator("Starting Heygen session...", true);
+            await createNewSession();
+            await startStreamingSession();
+            await startListening();
+            updateStatusIndicator("Heygen session active", false);
+          } catch (error) {
+            console.error('Error starting video session:', error);
+            updateStatusIndicator("Failed to start video session", false);
+          }
+        } else {
+          // Text/Speech mode: Only start voice detection
+          await startListening();
+        }
+      });
+      
+      document.querySelector("#stopTalkingBtn").addEventListener("click", async () => {
+        if (isVideoMode) {
+          // Video mode: Stop speech detection AND close Heygen session
+          stopListening(); // Stop voice detection first
+          await closeSession(); // Then close the Heygen session
+        } else {
+          // Text/Speech mode: Only stop voice detection
+          stopListening();
+        }
+      });
+      
+      document.querySelector("#settingsBtn").addEventListener("click", () => {
+        toggleSettings();
+      });
+      
+      document.querySelector("#closeSettingsBtn").addEventListener("click", () => {
+        toggleSettings();
+      });
+      
+      // Dark mode toggle event listener
+      document.querySelector("#darkModeToggle").addEventListener("click", () => {
+        toggleDarkMode();
+      });
+      
+      // Close settings modal when clicking outside
+      document.querySelector("#settingsModal").addEventListener("click", (e) => {
+        if (e.target.id === 'settingsModal') {
+          toggleSettings();
+        }
+      });
 
       document.querySelector("#talkBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
         if (text) {
-          sendText(text, "talk");
           taskInput.value = "";
         }
         processInput(text);
       });
 
-      document.querySelector("#repeatBtn").addEventListener("click", () => {
-        const text = taskInput.value.trim();
-        if (text) {
-          sendText(text, "repeat");
-          taskInput.value = "";
+      // Add Enter key support for text input
+      document.querySelector("#taskInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          const text = taskInput.value.trim();
+          if (text) {
+            taskInput.value = "";
+            processInput(text);
+          }
         }
       });
 
-      document.querySelector("#clearBtn").addEventListener("click", () => {
-        vadDetector.clearTranscripts();
+      // Initialize UI
+      document.addEventListener('DOMContentLoaded', () => {
+        updateVideoVisibility();
+        updateDarkMode(); // Initialize dark mode
+        console.log("Application ready to start");
+        
+        document.getElementById("startTalkingBtn").disabled = false;
+        document.getElementById("stopTalkingBtn").disabled = true;
       });
     </script>
   </body>

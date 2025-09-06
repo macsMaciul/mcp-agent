@@ -26,10 +26,7 @@ public class MCPChat
         _client = new ChatClientBuilder(chatClient)
             .UseFunctionInvocation()
             .Build();
-        var systemPrompt = _config["ChatClient:SystemPrompt"] ?? "You are a helpful assistant.";
-        _messageHistory.Clear();
-        _messageHistory.Add(new ChatMessage(ChatRole.System, systemPrompt));
-        _lastSentTime = DateTime.MinValue;  // force reinit of mcp clients and tools on first message
+        InitializeSession();
         //_ = Task.Run(async () => await InitializeMCPClientsAndTools());        
     }
 
@@ -39,6 +36,15 @@ public class MCPChat
         public required string Endpoint { get; set; }
         public required bool Enabled { get; set; }
     };
+
+    public void InitializeSession()
+    {
+        Console.WriteLine("Initializing the session...");
+        var systemPrompt = _config["ChatClient:SystemPrompt"] ?? "You are a helpful assistant.";
+        _messageHistory.Clear();
+        _messageHistory.Add(new ChatMessage(ChatRole.System, systemPrompt));
+        _lastSentTime = DateTime.MinValue;
+    }
 
     private async Task InitializeMCPClientsAndTools()
     {
