@@ -54,7 +54,7 @@ app.MapGet("/health", () =>
 });
 
 // reinitialize chat client
-app.MapPost("/newsession", async (MCPChat mcpChat) =>
+app.MapPost("/newsession", (MCPChat mcpChat) =>
 {
     mcpChat.InitializeSession();
     return Results.Json(new { success = true, message = "Chat client reinitialized" });

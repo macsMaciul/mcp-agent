@@ -610,9 +610,21 @@
       <!-- Left Panel: Chat Window -->
       <div class="left-panel">
         <!-- Header -->
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-medium" style="color: var(--md-sys-color-on-surface-variant);">AI Voice Assistant</h1>
-          <p style="color: var(--md-sys-color-outline); font-size: 14px;">Intelligent conversation with voice and video</p>
+        <div class="flex justify-between items-center mb-6">
+          <div class="text-center flex-1">
+            <h1 class="text-2xl font-medium" style="color: var(--md-sys-color-on-surface-variant);">AI Voice Assistant</h1>
+            <p style="color: var(--md-sys-color-outline); font-size: 14px;">Intelligent conversation with voice and video</p>
+          </div>
+          <div class="flex gap-2 ml-4">
+            <button id="newSessionBtn" class="material-button secondary" style="min-width: auto; padding: 8px 16px; font-size: 12px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              New Session
+            </button>
+            <button id="mcpResetBtn" class="material-button secondary" style="min-width: auto; padding: 8px 16px; font-size: 12px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span>
+              MCP Reset
+            </button>
+          </div>
         </div>
         
         <!-- Chat Window -->
@@ -1591,6 +1603,42 @@
             taskInput.value = "";
             processInput(text);
           }
+        }
+      });
+
+      // New Session button
+      document.querySelector("#newSessionBtn").addEventListener("click", async () => {
+        try {
+          const response = await fetch('/newsession', {
+            method: 'POST'
+          });
+          if (response.ok) {
+            updateVADStatus('New session started');
+            vadDetector.clearTranscripts();
+          } else {
+            updateVADStatus('Failed to start new session');
+          }
+        } catch (error) {
+          console.error('Error starting new session:', error);
+          updateVADStatus('Error starting new session');
+        }
+      });
+
+      // MCP Reset button
+      document.querySelector("#mcpResetBtn").addEventListener("click", async () => {
+        try {
+          const response = await fetch('/reinit', {
+            method: 'POST'
+          });
+          if (response.ok) {
+            updateVADStatus('MCP reset completed');
+            vadDetector.clearTranscripts();
+          } else {
+            updateVADStatus('Failed to reset MCP');
+          }
+        } catch (error) {
+          console.error('Error resetting MCP:', error);
+          updateVADStatus('Error resetting MCP');
         }
       });
 
